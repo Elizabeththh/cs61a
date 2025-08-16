@@ -28,9 +28,9 @@ def a_plus_abs_b(a, b):
     3
     """
     if b < 0:
-        f = _____
+        f = sub
     else:
-        f = _____
+        f = add
     return f(a, b)
 
 def a_plus_abs_b_syntax_check():
@@ -64,7 +64,17 @@ def hailstone(n):
     1
     """
     "*** YOUR CODE HERE ***"
-
+    print(n)
+    cnt = 1
+    while n != 1:
+        if n % 2:
+            n = n * 3 + 1
+        else:
+            n = n // 2
+        cnt += 1
+        print(n)
+    return cnt
+    
 
 def product(n, term):
     """Return the product of the first n terms in a sequence.
@@ -86,6 +96,11 @@ def product(n, term):
     162
     """
     "*** YOUR CODE HERE ***"
+    k, prod = 1, 1
+    while k <= n:
+        prod *= term(k)
+        k += 1
+    return prod
 
 
 def make_repeater(f, n):
@@ -102,4 +117,10 @@ def make_repeater(f, n):
     390625
     """
     "*** YOUR CODE HERE ***"
-
+    def repeater(x):
+        k = 0
+        while k < n:
+            x = f(x)
+            k += 1
+        return x
+    return repeater
