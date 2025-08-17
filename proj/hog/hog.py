@@ -21,7 +21,15 @@ def roll_dice(num_rolls, dice=six_sided):
     assert type(num_rolls) == int, "num_rolls must be an integer."
     assert num_rolls > 0, "Must roll at least once."
     # BEGIN PROBLEM 1
-    "*** YOUR CODE HERE ***"
+    res, t, s = [], 0, 0
+    while t < num_rolls:
+        res.append(dice())
+        if 1 in res:
+            s = 1
+        else:
+            s = sum(res)
+        t += 1
+    return s
     # END PROBLEM 1
 
 
@@ -33,7 +41,11 @@ def boar_brawl(player_score, opponent_score):
 
     """
     # BEGIN PROBLEM 2
-    "*** YOUR CODE HERE ***"
+    tenth_digit_of_oppo = (opponent_score // 10) % 10
+    ones_digit_of_pla = player_score % 10
+
+    res = abs(tenth_digit_of_oppo - ones_digit_of_pla) * 3
+    return res if res > 1 else 1
     # END PROBLEM 2
 
 
@@ -51,7 +63,10 @@ def take_turn(num_rolls, player_score, opponent_score, dice=six_sided):
     assert num_rolls >= 0, "Cannot roll a negative number of dice in take_turn."
     assert num_rolls <= 10, "Cannot roll more than 10 dice."
     # BEGIN PROBLEM 3
-    "*** YOUR CODE HERE ***"
+    if not num_rolls:
+        return boar_brawl(player_score, opponent_score)
+    else:
+        return roll_dice(num_rolls, dice)
     # END PROBLEM 3
 
 
@@ -78,14 +93,26 @@ def is_prime(n):
 def num_factors(n):
     """Return the number of factors of N, including 1 and N itself."""
     # BEGIN PROBLEM 4
-    "*** YOUR CODE HERE ***"
+    factors = {1, n}
+    m = 2
+    while m < n - 1:
+        if not n % m:
+            factors.add(m)
+        m += 1
+    return len(factors)
+
+
     # END PROBLEM 4
 
 
 def sus_points(score):
     """Return the new score of a player taking into account the Sus Fuss rule."""
     # BEGIN PROBLEM 4
-    "*** YOUR CODE HERE ***"
+    if num_factors(score) in [3, 4]:
+        score += 1
+        while not is_prime(score):
+            score += 1
+    return score
     # END PROBLEM 4
 
 
@@ -94,7 +121,9 @@ def sus_update(num_rolls, player_score, opponent_score, dice=six_sided):
     PLAYER_SCORE and then rolls NUM_ROLLS DICE, *including* Sus Fuss.
     """
     # BEGIN PROBLEM 4
-    "*** YOUR CODE HERE ***"
+    player_score = simple_update(num_rolls, player_score, opponent_score, dice)
+    player_score = sus_points(player_score)
+    return player_score
     # END PROBLEM 4
 
 
@@ -132,7 +161,12 @@ def play(strategy0, strategy1, update, score0=0, score1=0, dice=six_sided, goal=
     """
     who = 0  # Who is about to take a turn, 0 (first) or 1 (second)
     # BEGIN PROBLEM 5
-    "*** YOUR CODE HERE ***"
+    while score0 < goal and score1 < goal:
+        if not who:
+            score0 = update(strategy0(score0, score1), score0, score1, dice)
+        else:
+            score1 = update(strategy1(score1, score0), score1, score0, dice)
+        who = 1 - who
     # END PROBLEM 5
     return score0, score1
 
@@ -158,7 +192,9 @@ def always_roll(n):
     assert n >= 0 and n <= 10
 
     # BEGIN PROBLEM 6
-    "*** YOUR CODE HERE ***"
+    def roll_n_times(score0, score1):
+        return n
+    return roll_n_times
     # END PROBLEM 6
 
 
@@ -190,7 +226,16 @@ def is_always_roll(strategy, goal=GOAL):
     False
     """
     # BEGIN PROBLEM 7
-    "*** YOUR CODE HERE ***"
+    score0, score1 = 0, 1
+    comp = strategy(0, 0)
+    while score0 < goal:
+        while score1 < goal:
+            if strategy(score0, score1) != comp:
+                return False
+            score1 += 1
+        score0 += 1
+        score1 = 0
+    return True
     # END PROBLEM 7
 
 
@@ -207,7 +252,14 @@ def make_averaged(original_function, times_called=1000):
     """
 
     # BEGIN PROBLEM 8
-    "*** YOUR CODE HERE ***"
+    def run_n_times(*args):
+        n, sum = 0, 0
+        while n < times_called:
+            sum += original_function(*args) 
+            n += 1
+        return (sum / times_called)
+    
+    return run_n_times
     # END PROBLEM 8
 
 
@@ -220,7 +272,16 @@ def max_scoring_num_rolls(dice=six_sided, times_called=1000):
     1
     """
     # BEGIN PROBLEM 9
-    "*** YOUR CODE HERE ***"
+    num_of_dice, aver, max_average_value, max_num_of_dice = 1, 0, 0, 0
+    averaged_dice = make_averaged(roll_dice, times_called)
+    while num_of_dice <= 10:
+        aver = averaged_dice(num_of_dice, dice)
+        if aver > max_average_value:
+                max_average_value = aver
+                max_num_of_dice = num_of_dice
+        num_of_dice += 1
+    return max_num_of_dice
+
     # END PROBLEM 9
 
 
@@ -266,7 +327,10 @@ def boar_strategy(score, opponent_score, threshold=11, num_rolls=6):
     points, and returns NUM_ROLLS otherwise. Ignore the Sus Fuss rule.
     """
     # BEGIN PROBLEM 10
-    return num_rolls  # Remove this line once implemented.
+    if boar_brawl(score, opponent_score) >= threshold:
+        return 0
+    else:
+        return num_rolls 
     # END PROBLEM 10
 
 
@@ -275,7 +339,10 @@ def sus_strategy(score, opponent_score, threshold=11, num_rolls=6):
     THRESHOLD points, and returns NUM_ROLLS otherwise. Consider both the Boar Brawl and
     Suss Fuss rules."""
     # BEGIN PROBLEM 11
-    return num_rolls  # Remove this line once implemented.
+    if (sus_update(0, score, opponent_score) - score) >= threshold:
+        return 0
+    else:
+        return num_rolls  
     # END PROBLEM 11
 
 
@@ -285,7 +352,23 @@ def final_strategy(score, opponent_score):
     *** YOUR DESCRIPTION HERE ***
     """
     # BEGIN PROBLEM 12
-    return 6  # Remove this line once implemented.
+    pts_to_reach = GOAL - score
+    boar_brawl_pts = sus_update(0, score, opponent_score) - score
+
+    roll_dice_averaged = make_averaged(roll_dice, 60)
+    dice_averaged = [0] + [roll_dice_averaged(i, six_sided) for i in range(1, 11)]
+
+    dice_to_earn_max_pts = max(range(1, 11), key=lambda i: dice_averaged[i])
+    
+
+    if boar_brawl_pts > pts_to_reach or boar_brawl_pts > dice_averaged[dice_to_earn_max_pts]:
+        return 0
+    elif score > opponent_score:
+        return max(range(1, 4), key=lambda i: dice_averaged[i])
+    else:
+        return 6 if dice_to_earn_max_pts < 4 else dice_to_earn_max_pts
+    
+
     # END PROBLEM 12
 
 
